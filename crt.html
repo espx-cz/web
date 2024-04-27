@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Konverze SSL certifikátu (*.crt) na hlavičkový soubor (*.h)</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            font-size: 1.5em;
+        }
+        h2 {
+            font-size: 1.25em;
+        }
+        h3 {
+            font-size: 1.125em;
+        }
+        h4 {
+            font-size: 1em;
+        }
+        h5 {
+            font-size: 0.875em;
+        }
+        h6 {
+            font-size: 0.75em;
+        }
+        pre {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 1em;
+            white-space: pre-wrap;
+        }
+        form {
+            margin: 1em 0;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1em;
+            padding: 0.5em 1em;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+            border: 1px solid #0056b3;
+        }
+        input[type="submit"]:active {
+            background-color: #004286;
+            border: 1px solid #004286;
+        }
+    </style>
+</head>
+<body>
+    <h1>Konverze SSL certifikátu (*.crt) na hlavičkový soubor (*.h)</h1>
+    <form method="post" action="#" onsubmit="return false">
+        <input type="file" id="crt">
+        <input type="submit" value="Konvertovat" onclick="convert()">
+    </form>
+
+    <script>
+
+
+        const convert = () => {
+            //e.preventDefault();
+            const file = document.getElementById('crt').files[0];
+            console.log("CONV",file)
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const content = reader.result;
+                    console.log(content);
+                    // add " and \n"+ to each line
+                    const lines = content.split('\n').filter(line => line.trim().length > 0);
+                    let header = lines.map(line => `"${line.trim()}\\n" \\`).join('\n');
+                    //replace last two characters with a semicolon
+                    header = header.slice(0, -2) + ';';
+                    //variable initialization
+                    header = "const char *root_cert = \\\n" + header;
+
+                    //add some Arduino specific code
+                    header = header + "\n\nWiFiClientSecure client;\n\n//add this to setup():\n//client.setCACert(root_cert);"
+                    
+
+                    //console.log(header);
+
+                    const pre = document.createElement('pre');
+                    pre.textContent = header;
+                    document.body.appendChild(pre);
+                };
+                reader.readAsText(file);
+            }
+            return false;
+        };
+        
+    </script>
+</html>
